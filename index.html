@@ -70,11 +70,11 @@ body{
 .wrap{
   max-width:560px;
   margin:0 auto;
-  padding:24px 20px 60px;
+  padding:32px 20px 60px;
   min-height:100dvh;
   display:flex;
   flex-direction:column;
-  justify-content:center;
+  justify-content:flex-start;
 }
 .screen{ display:none; animation:fadeUp .5s ease both; }
 .screen.active{ display:block; }
@@ -91,7 +91,7 @@ body{
 .d3{ bottom:10%; left:9%; width:34px; animation:float 8s ease-in-out infinite .4s; }
 .d4{ bottom:16%; right:7%; width:26px; animation:float 6.5s ease-in-out infinite 1.2s; }
 @keyframes float{ 0%,100%{ transform:translateY(0) rotate(0); } 50%{ transform:translateY(-12px) rotate(8deg); } }
-.wrap, .deco{ position:relative; z-index:1; }
+.wrap{ position:relative; z-index:1; }
 
 /* ============ 共通パーツ ============ */
 .card{
@@ -177,14 +177,16 @@ body{
   text-align:left;
   line-height:2;
 }
-.chara-row{
-  display:flex; justify-content:center; flex-wrap:wrap; gap:6px;
-  margin:24px 0 28px;
+/* トップの9キャラ集合イラスト（ito.png） */
+.ito-img{
+  display:block;
+  width:100%;
+  max-width:280px;      /* スマホ：小さめ */
+  height:auto;
+  margin:10px auto 22px;
 }
-.chara-row img{
-  width:44px; height:44px; border-radius:50%;
-  box-shadow:var(--shadow-soft);
-  background:#fff;
+@media (min-width:520px){
+  .ito-img{ max-width:380px; }   /* PC・広い画面：大きめ */
 }
 
 /* ============ 質問画面 ============ */
@@ -293,7 +295,20 @@ body{
   margin-bottom:2px;
 }
 .main-card .name .k{ color:var(--pink-deep); }
-.main-card .tagline{ font-size:13px; color:var(--ink-soft); }
+.main-card .card-label{
+  display:inline-block;
+  background:#fff; color:var(--pink-deep);
+  font-size:12px; font-weight:800; letter-spacing:.04em;
+  padding:5px 16px; border-radius:999px;
+  box-shadow:var(--shadow-soft);
+  margin-bottom:14px;
+}
+.main-card .chara-tag{
+  font-size:13.5px; color:var(--ink-soft); font-weight:600;
+  margin-top:4px;
+}
+.main-card .chara-tag::before,
+.main-card .chara-tag::after{ content:"・"; color:var(--pink); }
 
 /* サブキャラ */
 .sub-title{
@@ -318,6 +333,7 @@ body{
 .sub-card img{ width:66px; height:66px; border-radius:50%; background:#fff; box-shadow:var(--shadow-soft); }
 .sub-card .name{ font-size:16px; font-weight:800; margin-top:8px; }
 .sub-card .name .k{ color:var(--pink-deep); }
+.sub-card .s-tag{ font-size:11px; color:var(--ink-soft); margin-top:3px; }
 
 /* 詳細セクション */
 .detail{ margin-top:34px; display:flex; flex-direction:column; gap:14px; }
@@ -410,7 +426,7 @@ body{
       <h1>今のあなた<br><span class="hl">どのキャラが前に出てる？</span></h1>
       <p class="sub">今の感情や思考のクセから、<br>“今強く出ているキャラ”を見つける簡易チェックです。</p>
 
-      <div class="chara-row" id="startCharas"></div>
+      <img class="ito-img" src="images/ito.png" alt="9人のキャラクターに囲まれて考える女性のイラスト">
 
       <p class="lead">
         生まれ持った性格タイプを決めるものではありません。<br>
@@ -456,9 +472,10 @@ body{
     </div>
 
     <div class="main-card">
+      <span class="card-label">今、強く出ているキャラ</span>
       <img class="avatar" id="mainImg" alt="">
       <div class="name" id="mainName"></div>
-      <div class="tagline">今、強く出ているキャラ</div>
+      <div class="chara-tag" id="mainTag"></div>
     </div>
 
     <div class="sub-title">あなたを支えているキャラ</div>
@@ -645,16 +662,6 @@ const TOTAL = QUESTIONS.length;
 let current = 0;                       // 表示中の質問index
 let answers = new Array(TOTAL).fill(null); // 各問の選択index
 
-/* トップにキャラ画像を並べる */
-(function initStart(){
-  const row = document.getElementById("startCharas");
-  Object.values(CHARACTERS).forEach(c=>{
-    const img = document.createElement("img");
-    img.src = c.image; img.alt = ""; img.loading = "lazy";
-    row.appendChild(img);
-  });
-})();
-
 function showScreen(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
@@ -745,12 +752,13 @@ function showResult(){
   const first = rank[0];
   const c = CHARACTERS[first];
 
-  // メインキャラ
+  // メインキャラ（アイコン＋名前＋特徴を1つのカードに）
   document.getElementById("mainImg").src = c.image;
   document.getElementById("mainImg").alt = first + "キャラ";
   document.getElementById("mainName").innerHTML = `${first}<span class="k">キャラ</span>`;
+  document.getElementById("mainTag").textContent = c.tag;
 
-  // サブキャラ（2位・3位）
+  // 支えているキャラ（2位・3位：アイコン＋名前＋特徴を1つのカードに）
   const subBox = document.getElementById("subCards");
   subBox.innerHTML = "";
   [1,2].forEach(idx=>{
@@ -762,38 +770,28 @@ function showResult(){
     el.innerHTML = `
       <span class="rank">${idx+1}位</span>
       <img src="${sc.image}" alt="${key}キャラ">
-      <div class="name">${key}<span class="k">キャラ</span></div>`;
+      <div class="name">${key}<span class="k">キャラ</span></div>
+      <div class="s-tag">${sc.tag}</div>`;
     subBox.appendChild(el);
   });
 
-  // 支えているキャラの名前（本文用）
-  const supporters = rank.slice(1,3).map(k=> k+"キャラ").join("・") || "（今回はメインのみ）";
-
-  // 6項目
+  // 解説（今の状態・無理しているポイント・整え方・メッセージ）
   const detail = document.getElementById("detail");
   detail.innerHTML = `
     <div class="sec">
-      <h3>① 今、強く出ているキャラ</h3>
-      <p><b>${first}キャラ</b>（${c.tag}）</p>
-    </div>
-    <div class="sec support">
-      <h3>② 支えてくれているキャラ</h3>
-      <p class="who">${supporters}</p>
-    </div>
-    <div class="sec">
-      <h3>③ 今の状態</h3>
+      <h3>今の状態</h3>
       <p>${c.state}</p>
     </div>
     <div class="sec">
-      <h3>④ 無理しているポイント</h3>
+      <h3>無理しているポイント</h3>
       <p>${c.strain}</p>
     </div>
     <div class="sec">
-      <h3>⑤ 今日できる整え方</h3>
+      <h3>今日できる整え方</h3>
       <p>${c.care}</p>
     </div>
     <div class="sec message">
-      <h3>⑥ 今のあなたへのメッセージ</h3>
+      <h3>今のあなたへのメッセージ</h3>
       <p>${c.message}</p>
     </div>`;
 
