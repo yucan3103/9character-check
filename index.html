@@ -144,6 +144,17 @@ body{
 /* ============ トップ画面 ============ */
 .hero{ text-align:center; }
 .hero .badge{ background:var(--pink-bg); color:var(--pink-deep); }
+/* 9キャラ心理学ロゴ */
+.hero .logo{
+  display:block;
+  width:100%;
+  max-width:230px;      /* スマホ */
+  height:auto;
+  margin:0 auto 14px;
+}
+@media (min-width:520px){
+  .hero .logo{ max-width:280px; }   /* PC・広い画面 */
+}
 .hero h1{
   font-size:26px;
   line-height:1.55;
@@ -433,8 +444,8 @@ body{
   <!-- ============ トップ画面 ============ -->
   <section id="screen-start" class="screen active">
     <div class="card hero">
-      <span class="badge">今の状態 かんたんチェック</span>
-      <h1>今のあなた<br><span class="hl">どのキャラが前に出てる？</span></h1>
+      <img class="logo" src="images/logo.png" alt="9キャラ心理学">
+      <h1>今のあなたは<br><span class="hl">どのキャラが前に出てる？</span><br>簡単チェック！</h1>
       <p class="sub">今の感情や思考のクセから、<br>“今強く出ているキャラ”を見つける簡易チェックです。</p>
 
       <img class="ito-img" src="images/ito.png" alt="9人のキャラクターに囲まれて考える女性のイラスト">
