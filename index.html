@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="format-detection" content="telephone=no">
+<title>今のあなた どのキャラが前に出てる？</title>
+<meta name="description" content="今の感情や思考のクセから、“現在強く出ている9キャラ”を6問でチェックします。">
+
+<!-- =========================================================
+     9キャラ心理学 かんたん状態チェック
+     -----------------------------------------------------------
+     ▼ 修正のしかた（かんたんガイド）
+       ・色を変えたい      → <style> 内の :root { --xxx } を編集
+       ・質問を変えたい    → 下の <script> 内 QUESTIONS を編集
+       ・結果文章を変えたい → 下の <script> 内 CHARACTERS を編集
+       ・キャラ画像を変える → CHARACTERS の image のファイル名を編集
+       ・セッションのリンク → RESULT_LINK を編集
+     ========================================================= -->
+
+<style>
+/* ============ カラー・基本設定 ============ */
+:root{
+  /* 背景・ベース */
+  --bg:          #fbf6ef;   /* アイボリー背景 */
+  --bg-2:        #f5ece1;   /* 少し濃いベージュ */
+  --card:        #ffffff;   /* カード白 */
+  --ink:         #5b5048;   /* 文字（やわらかいブラウン） */
+  --ink-soft:    #8a7f75;   /* 薄い文字 */
+
+  /* アクセント（くすみカラー） */
+  --pink:        #eab8c4;   /* くすみピンク */
+  --pink-deep:   #de9aac;
+  --lavender:    #c8bfe0;   /* ラベンダー */
+  --mint:        #b8dccb;   /* 淡いミント */
+  --yellow:      #f3dfa0;   /* 淡いイエロー */
+
+  --pink-bg:     #fbeef1;
+  --lavender-bg: #f1eef8;
+  --mint-bg:     #eaf5ef;
+  --yellow-bg:   #fcf6e4;
+
+  --shadow:      0 10px 30px rgba(150,120,110,.14);
+  --shadow-soft: 0 6px 18px rgba(150,120,110,.10);
+  --radius:      26px;
+  --radius-lg:   34px;
+}
+
+/* ============ リセット ============ */
+*{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+html{ scroll-behavior:smooth; }
+body{
+  font-family:"Hiragino Maru Gothic ProN","Hiragino Maru Gothic Pro","Rounded Mplus 1c","Zen Maru Gothic",
+              "Hiragino Kaku Gothic ProN","Segoe UI",sans-serif;
+  color:var(--ink);
+  line-height:1.9;
+  background:var(--bg);
+  background-image:
+    radial-gradient(circle at 12% 8%,  rgba(200,191,224,.30) 0, transparent 42%),
+    radial-gradient(circle at 88% 14%, rgba(234,184,196,.28) 0, transparent 40%),
+    radial-gradient(circle at 78% 92%, rgba(184,220,203,.30) 0, transparent 42%),
+    radial-gradient(circle at 8% 88%,  rgba(243,223,160,.30) 0, transparent 40%);
+  background-attachment:fixed;
+  min-height:100dvh;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+
+/* ============ レイアウト ============ */
+.wrap{
+  max-width:560px;
+  margin:0 auto;
+  padding:24px 20px 60px;
+  min-height:100dvh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.screen{ display:none; animation:fadeUp .5s ease both; }
+.screen.active{ display:block; }
+@keyframes fadeUp{
+  from{ opacity:0; transform:translateY(14px); }
+  to{ opacity:1; transform:translateY(0); }
+}
+
+/* ============ 装飾（手描き感・キラキラ） ============ */
+.deco{ position:fixed; pointer-events:none; z-index:0; opacity:.7; }
+.deco svg{ display:block; }
+.d1{ top:6%;  left:6%;  width:40px; animation:float 6s ease-in-out infinite; }
+.d2{ top:14%; right:8%; width:30px; animation:float 7s ease-in-out infinite .8s; }
+.d3{ bottom:10%; left:9%; width:34px; animation:float 8s ease-in-out infinite .4s; }
+.d4{ bottom:16%; right:7%; width:26px; animation:float 6.5s ease-in-out infinite 1.2s; }
+@keyframes float{ 0%,100%{ transform:translateY(0) rotate(0); } 50%{ transform:translateY(-12px) rotate(8deg); } }
+.wrap, .deco{ position:relative; z-index:1; }
+
+/* ============ 共通パーツ ============ */
+.card{
+  background:var(--card);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow);
+  padding:34px 26px;
+}
+.badge{
+  display:inline-block;
+  background:var(--lavender-bg);
+  color:#8a7bb5;
+  font-size:12.5px;
+  font-weight:700;
+  letter-spacing:.06em;
+  padding:6px 16px;
+  border-radius:999px;
+  margin-bottom:18px;
+}
+
+/* ボタン */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  width:100%;
+  border:none;
+  border-radius:999px;
+  padding:17px 24px;
+  font-size:17px;
+  font-weight:700;
+  font-family:inherit;
+  color:#fff;
+  cursor:pointer;
+  background:linear-gradient(135deg,var(--pink) 0%,var(--pink-deep) 60%,#d38fb3 100%);
+  box-shadow:0 8px 20px rgba(222,154,172,.45);
+  transition:transform .15s ease, box-shadow .2s ease, opacity .2s;
+}
+.btn:hover{ transform:translateY(-2px); box-shadow:0 12px 26px rgba(222,154,172,.55); }
+.btn:active{ transform:translateY(0) scale(.98); }
+.btn.ghost{
+  background:#fff;
+  color:var(--ink-soft);
+  box-shadow:inset 0 0 0 2px #ece2d6;
+  font-size:15px;
+  padding:13px 22px;
+  width:auto;
+}
+.btn.ghost:hover{ box-shadow:inset 0 0 0 2px var(--lavender); transform:translateY(-1px); }
+.btn.mint{ background:linear-gradient(135deg,var(--mint) 0%,#93c9ae 100%); box-shadow:0 8px 20px rgba(147,201,174,.45); }
+
+/* ============ トップ画面 ============ */
+.hero{ text-align:center; }
+.hero .badge{ background:var(--pink-bg); color:var(--pink-deep); }
+.hero h1{
+  font-size:26px;
+  line-height:1.55;
+  font-weight:800;
+  letter-spacing:.01em;
+  margin-bottom:6px;
+}
+.hero h1 .hl{
+  background:linear-gradient(transparent 62%, var(--yellow) 62%);
+  padding:0 2px;
+}
+.hero .sub{
+  font-size:14.5px;
+  color:var(--ink-soft);
+  margin:18px 0 4px;
+}
+.note-box{
+  background:var(--mint-bg);
+  border-radius:20px;
+  padding:16px 18px;
+  font-size:13px;
+  color:#5f8a74;
+  margin:22px 0;
+  text-align:left;
+  line-height:1.8;
+}
+.lead{
+  font-size:14.5px;
+  color:var(--ink);
+  margin:22px 0;
+  text-align:left;
+  line-height:2;
+}
+.chara-row{
+  display:flex; justify-content:center; flex-wrap:wrap; gap:6px;
+  margin:24px 0 28px;
+}
+.chara-row img{
+  width:44px; height:44px; border-radius:50%;
+  box-shadow:var(--shadow-soft);
+  background:#fff;
+}
+
+/* ============ 質問画面 ============ */
+.progress-head{
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:12px;
+}
+.progress-head .count{ font-size:14px; font-weight:700; color:var(--pink-deep); }
+.progress-head .count b{ font-size:19px; }
+.progress-head .label{ font-size:12px; color:var(--ink-soft); }
+.pbar{
+  height:12px; border-radius:999px; background:#efe6da;
+  overflow:hidden; margin-bottom:26px;
+  box-shadow:inset 0 1px 3px rgba(150,120,110,.12);
+}
+.pbar > span{
+  display:block; height:100%;
+  background:linear-gradient(90deg,var(--pink),var(--lavender),var(--mint));
+  border-radius:999px;
+  width:0%;
+  transition:width .45s cubic-bezier(.4,.1,.2,1);
+}
+.q-num{
+  display:inline-flex; align-items:center; gap:7px;
+  color:var(--pink-deep); font-weight:800; font-size:14px;
+  margin-bottom:8px;
+}
+.q-text{
+  font-size:21px; font-weight:800; line-height:1.6;
+  margin-bottom:24px;
+}
+.options{ display:flex; flex-direction:column; gap:13px; }
+.opt{
+  display:flex; align-items:center; gap:14px;
+  width:100%; text-align:left;
+  background:#fff;
+  border:2px solid #efe6da;
+  border-radius:20px;
+  padding:17px 18px;
+  font-size:15.5px;
+  font-weight:600;
+  font-family:inherit;
+  color:var(--ink);
+  cursor:pointer;
+  transition:all .2s ease;
+  line-height:1.6;
+}
+.opt .mark{
+  flex:0 0 34px; height:34px;
+  display:grid; place-items:center;
+  border-radius:50%;
+  background:var(--bg-2);
+  color:var(--ink-soft);
+  font-weight:800; font-size:15px;
+  transition:all .2s ease;
+}
+.opt:hover{ border-color:var(--lavender); transform:translateY(-2px); box-shadow:var(--shadow-soft); }
+/* 選択時ふわっと */
+.opt.selected{
+  border-color:var(--pink-deep);
+  background:var(--pink-bg);
+  transform:scale(1.015);
+  box-shadow:0 8px 22px rgba(222,154,172,.30);
+}
+.opt.selected .mark{ background:var(--pink-deep); color:#fff; }
+/* 各選択肢の色分け（やさしいアクセント） */
+.opt:nth-child(1) .mark{ background:var(--pink-bg);     color:var(--pink-deep); }
+.opt:nth-child(2) .mark{ background:var(--lavender-bg); color:#8a7bb5; }
+.opt:nth-child(3) .mark{ background:var(--mint-bg);     color:#5f8a74; }
+.opt:nth-child(4) .mark{ background:var(--yellow-bg);   color:#c8a54b; }
+.opt.selected .mark{ background:var(--pink-deep) !important; color:#fff !important; }
+
+.q-foot{ margin-top:24px; display:flex; justify-content:flex-start; }
+
+/* ============ 結果画面 ============ */
+.result-top{ text-align:center; margin-bottom:8px; }
+.result-lead{
+  font-size:15px; color:var(--ink-soft); font-weight:700;
+  margin-bottom:16px;
+}
+.main-card{
+  background:linear-gradient(160deg,#fff 0%,var(--pink-bg) 100%);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow);
+  padding:30px 24px 28px;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+  border:2px solid #fbe3ea;
+}
+.main-card::before,.main-card::after{
+  content:"✦"; position:absolute; color:var(--pink); opacity:.5; font-size:20px;
+}
+.main-card::before{ top:16px; left:20px; }
+.main-card::after{ top:20px; right:22px; font-size:14px; }
+.main-card .avatar{
+  width:130px; height:130px; border-radius:50%;
+  box-shadow:0 8px 24px rgba(222,154,172,.4);
+  background:#fff; margin:6px auto 14px;
+  animation:pop .6s cubic-bezier(.2,1.3,.4,1) both;
+}
+@keyframes pop{ from{ transform:scale(.4); opacity:0; } to{ transform:scale(1); opacity:1; } }
+.main-card .name{
+  font-size:34px; font-weight:900; letter-spacing:.02em;
+  color:var(--ink);
+  margin-bottom:2px;
+}
+.main-card .name .k{ color:var(--pink-deep); }
+.main-card .tagline{ font-size:13px; color:var(--ink-soft); }
+
+/* サブキャラ */
+.sub-title{
+  text-align:center; font-size:14px; font-weight:800;
+  color:var(--ink-soft); margin:30px 0 14px;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+}
+.sub-title::before,.sub-title::after{ content:""; height:1px; width:34px; background:#e4d8c9; }
+.sub-cards{ display:flex; gap:12px; justify-content:center; }
+.sub-card{
+  flex:1; max-width:180px;
+  background:#fff; border-radius:22px;
+  box-shadow:var(--shadow-soft);
+  padding:18px 12px; text-align:center;
+  border:2px solid #f2ead9;
+}
+.sub-card .rank{
+  display:inline-block; font-size:11px; font-weight:800;
+  color:#a99cc9; background:var(--lavender-bg);
+  padding:2px 12px; border-radius:999px; margin-bottom:8px;
+}
+.sub-card img{ width:66px; height:66px; border-radius:50%; background:#fff; box-shadow:var(--shadow-soft); }
+.sub-card .name{ font-size:16px; font-weight:800; margin-top:8px; }
+.sub-card .name .k{ color:var(--pink-deep); }
+
+/* 詳細セクション */
+.detail{ margin-top:34px; display:flex; flex-direction:column; gap:14px; }
+.sec{
+  background:#fff; border-radius:22px;
+  box-shadow:var(--shadow-soft);
+  padding:20px 20px 22px;
+  border-left:6px solid var(--pink);
+}
+.sec:nth-of-type(1){ border-left-color:var(--pink); }
+.sec:nth-of-type(2){ border-left-color:var(--lavender); }
+.sec:nth-of-type(3){ border-left-color:var(--mint); }
+.sec:nth-of-type(4){ border-left-color:var(--yellow); }
+.sec h3{
+  font-size:15px; font-weight:800; margin-bottom:8px;
+  display:flex; align-items:center; gap:8px; color:var(--ink);
+}
+.sec h3 .ic{ font-size:18px; }
+.sec p{ font-size:14.5px; color:var(--ink); line-height:1.95; }
+.sec.support{ background:var(--lavender-bg); border-left-color:var(--lavender); }
+.sec.support .who{ font-weight:800; color:#8a7bb5; }
+.sec.message{
+  background:linear-gradient(135deg,var(--pink-bg),var(--yellow-bg));
+  border-left:none; text-align:center; padding:26px 22px;
+}
+.sec.message h3{ justify-content:center; }
+.sec.message p{ font-size:15px; font-weight:600; }
+
+/* 注意書き */
+.warn{
+  background:#fff7f0;
+  border:2px dashed #f0d3bb;
+  border-radius:22px;
+  padding:22px 20px;
+  margin-top:30px;
+  font-size:13.5px;
+  line-height:1.95;
+  color:#9a8574;
+}
+.warn .warn-title{ font-weight:800; color:#c98a5a; margin-bottom:8px; display:block; }
+.warn strong{ color:#8a6a56; }
+
+.cta-box{ margin-top:22px; text-align:center; }
+.cta-box .cta-lead{ font-size:13.5px; color:var(--ink-soft); margin-bottom:14px; }
+.book-img{
+  width:100%;
+  max-width:420px;
+  border-radius:20px;
+  box-shadow:var(--shadow);
+  margin:4px auto 18px;
+  display:block;
+}
+.book-cap{ font-size:12px; color:var(--ink-soft); margin-bottom:16px; }
+
+.restart{ text-align:center; margin-top:22px; }
+
+.footer{
+  text-align:center; font-size:11.5px; color:#bcae9f;
+  margin-top:34px; line-height:1.9;
+}
+.footer a{ color:#a99a89; text-decoration:underline; text-underline-offset:2px; }
+.footer a:hover{ color:var(--pink-deep); }
+
+/* ============ スマホ最適化 ============ */
+@media (max-width:400px){
+  .hero h1{ font-size:23px; }
+  .q-text{ font-size:19px; }
+  .main-card .name{ font-size:30px; }
+  .main-card .avatar{ width:112px; height:112px; }
+  .opt{ font-size:14.5px; padding:15px 15px; }
+  .sub-card{ padding:14px 8px; }
+  .sub-card img{ width:56px; height:56px; }
+}
+</style>
+</head>
+<body>
+
+<!-- 背景の控えめな装飾 -->
+<div class="deco d1"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2c.5 4 2.5 6 8 6-5.5 0-7.5 2-8 8-.5-6-2.5-8-8-8 5.5 0 7.5-2 8-6z" fill="#eab8c4"/></svg></div>
+<div class="deco d2"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l2.2 4.6L19 8.3l-3.5 3.4.9 4.9L12 14.3 7.6 16.6l.9-4.9L5 8.3l4.8-.7L12 3z" fill="#f3dfa0"/></svg></div>
+<div class="deco d3"><svg viewBox="0 0 24 24"><g fill="#c8bfe0"><circle cx="12" cy="6" r="3.2"/><circle cx="12" cy="18" r="3.2"/><circle cx="6" cy="12" r="3.2"/><circle cx="18" cy="12" r="3.2"/><circle cx="12" cy="12" r="2.4" fill="#f3dfa0"/></g></svg></div>
+<div class="deco d4"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2c.5 4 2.5 6 8 6-5.5 0-7.5 2-8 8-.5-6-2.5-8-8-8 5.5 0 7.5-2 8-6z" fill="#b8dccb"/></svg></div>
+
+<div class="wrap">
+
+  <!-- ============ トップ画面 ============ -->
+  <section id="screen-start" class="screen active">
+    <div class="card hero">
+      <span class="badge">今の状態 かんたんチェック</span>
+      <h1>今のあなた<br><span class="hl">どのキャラが前に出てる？</span></h1>
+      <p class="sub">今の感情や思考のクセから、<br>“今強く出ているキャラ”を見つける簡易チェックです。</p>
+
+      <div class="chara-row" id="startCharas"></div>
+
+      <p class="lead">
+        生まれ持った性格タイプを決めるものではありません。<br>
+        その日の気分や環境によって結果は変わります。<br><br>
+        6つの質問に、<br>深く考えず直感で答えてくださいね。
+      </p>
+
+      <div class="note-box">
+        ※これは性格診断ではなく「今の状態」を知る簡易チェックです。
+      </div>
+
+      <button class="btn" onclick="startQuiz()">今のキャラ分析を開始</button>
+    </div>
+    <p class="footer">
+      © Self Character Development Association All Rights Reserved.<br>
+      <a href="https://9chara-psychology.jp/" target="_blank" rel="noopener">９キャラ心理学 BY セルフキャラ育成協会</a>
+    </p>
+  </section>
+
+  <!-- ============ 質問画面 ============ -->
+  <section id="screen-quiz" class="screen">
+    <div class="card">
+      <div class="progress-head">
+        <span class="count"><b id="curNum">1</b> / 6</span>
+        <span class="label">直感でえらんでね</span>
+      </div>
+      <div class="pbar"><span id="pbarFill"></span></div>
+
+      <div class="q-num"><span>Q<span id="qNum">1</span></span></div>
+      <p class="q-text" id="qText"></p>
+      <div class="options" id="options"></div>
+
+      <div class="q-foot">
+        <button class="btn ghost" id="backBtn" onclick="prevQuestion()">← もどる</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 結果画面 ============ -->
+  <section id="screen-result" class="screen">
+    <div class="result-top">
+      <p class="result-lead">今、いちばん前に出ているのは…</p>
+    </div>
+
+    <div class="main-card">
+      <img class="avatar" id="mainImg" alt="">
+      <div class="name" id="mainName"></div>
+      <div class="tagline">今、強く出ているキャラ</div>
+    </div>
+
+    <div class="sub-title">あなたを支えているキャラ</div>
+    <div class="sub-cards" id="subCards"></div>
+
+    <div class="detail" id="detail"></div>
+
+    <div class="warn">
+      <span class="warn-title">注意</span>
+      今回の分析結果は、<strong>「今の状態」を分析するもの</strong>であって、生まれ持った性格タイプを診断するものではありません。<br><br>
+      メインのキャラタイプ（個性タイプ）を知りたい方は、認定診断士による<strong>「キャリアグラム」「おやこグラム」</strong>の診断セッションをご利用ください。<br><br>
+      「今」だけではなく、変わることのない自分自身の心理パターンを知ることができます。
+    </div>
+
+    <div class="cta-box">
+      <img class="book-img" src="images/session-book.png" alt="キャリアグラム・おやこグラムの診断ブック">
+      <p class="book-cap">認定診断士による診断セッションでお届けする診断ブックです</p>
+      <p class="cta-lead">本来の“わたし”を知りたくなったら ↓</p>
+      <a class="btn mint" id="ctaBtn" href="#" target="_blank" rel="noopener">診断セッションを受ける</a>
+    </div>
+
+    <div class="restart">
+      <button class="btn ghost" onclick="restart()">もう一度 分析する ↺</button>
+    </div>
+
+    <p class="footer">
+      © Self Character Development Association All Rights Reserved.<br>
+      <a href="https://9chara-psychology.jp/" target="_blank" rel="noopener">９キャラ心理学 BY セルフキャラ育成協会</a>
+    </p>
+  </section>
+
+</div>
+
+<script>
+/* =========================================================
+   ① 診断セッションのリンク先
+   ========================================================= */
+const RESULT_LINK = "https://9chara-psychology.jp/professional/";
+
+/* =========================================================
+   ② 質問データ（A/B/C/D → キャラ名）
+      ※選択肢にキャラ名は表示しません
+   ========================================================= */
+const QUESTIONS = [
+  {
+    q: "最近の自分に一番近いのは？",
+    opts: [
+      { t: "ちゃんとやらなきゃと気を張っている",       c: "騎士" },
+      { t: "相手を優先してしまい、自分のことが後回し", c: "神様" },
+      { t: "結果を出さなきゃと焦っている",             c: "探検家" },
+      { t: "このままで大丈夫か不安になる",             c: "探偵" },
+    ]
+  },
+  {
+    q: "しんどい時、出やすい反応は？",
+    opts: [
+      { t: "一人で考え込んで分析し続ける",       c: "博士" },
+      { t: "もういいやと諦めてしまう",           c: "僧侶" },
+      { t: "イライラして強く当たってしまう",     c: "王様" },
+      { t: "楽なこと・楽しいことに逃げたくなる", c: "妖精" },
+    ]
+  },
+  {
+    q: "今の自分の中で強い欲求は？",
+    opts: [
+      { t: "正しくありたい・間違えたくない",     c: "騎士" },
+      { t: "誰かの役に立ちたい・喜ばれたい",     c: "神様" },
+      { t: "認められたい・成果を出したい",       c: "探検家" },
+      { t: "自分らしく表現したい",               c: "魔法使い" },
+    ]
+  },
+  {
+    q: "頭の中でよく考えているのは？",
+    opts: [
+      { t: "これで正しいのか？ちゃんとできてるか",       c: "騎士" },
+      { t: "嫌われていないか・迷惑かけてないか",         c: "神様" },
+      { t: "どうすればうまくいくか・成果を出せるか",     c: "探検家" },
+      { t: "リスクや不安、最悪のパターン",               c: "探偵" },
+    ]
+  },
+  {
+    q: "最近の行動として近いのは？",
+    opts: [
+      { t: "我慢してでもやりきる",               c: "騎士" },
+      { t: "人のために動きすぎている",           c: "神様" },
+      { t: "目標に向かって頑張り続けている",     c: "探検家" },
+      { t: "自分の世界観や感覚を大事にしている", c: "魔法使い" },
+    ]
+  },
+  {
+    q: "今の自分に一番近い状態は？",
+    opts: [
+      { t: "冷静に分析して距離を取っている",     c: "博士" },
+      { t: "ちょっと疲れて止まりたい",           c: "僧侶" },
+      { t: "主導権を持ちたくて強く出てしまう",   c: "王様" },
+      { t: "自由でいたくて縛られたくない",       c: "妖精" },
+    ]
+  },
+];
+
+/* =========================================================
+   ③ 9キャラの結果データ（画像・文章）
+      image は同じフォルダのファイル名を指定
+   ========================================================= */
+const CHARACTERS = {
+  "騎士": {
+    image: "images/kishi.png",
+    tag: "まもり、がんばる人",
+    state: "今のあなたは、「ちゃんとやらなきゃ」「間違えたくない」という気持ちが少し強くなっているようです。責任感を持って物事に向き合える、とても頼もしい状態でもあります。",
+    strain: "自分の中の基準が高くなりすぎると、少しの失敗や予定変更でも自分を責めやすくなります。知らないうちに気を張り続けているかもしれません。",
+    care: "今日ひとつだけ、「ここまでできれば十分」という合格ラインを決めてみてください。",
+    message: "あなたがこんなに頑張っているのは、大切なものを守りたいから。今日は少しだけ鎧をゆるめても大丈夫ですよ。",
+  },
+  "神様": {
+    image: "images/kamisama.png",
+    tag: "やさしく、気配りする人",
+    state: "今のあなたは、人の気持ちを大切にしたり、誰かの役に立とうとする気持ちが強くなっているようです。やさしさや気配りがたくさん発揮されている状態です。",
+    strain: "人を優先しすぎて、自分の疲れや本音が後回しになっているかもしれません。",
+    care: "「私は本当はどうしたい？」と一度だけ自分にも聞いてあげてください。",
+    message: "人に向けているやさしさを、今日は少しだけ自分にも向けてみてくださいね。",
+  },
+  "探検家": {
+    image: "images/tankenka.png",
+    tag: "前へ進む人",
+    state: "今のあなたは、成果を出したい、前に進みたい、認められたいというエネルギーが強くなっているようです。目標に向かって進める力が高まっています。",
+    strain: "「もっとやらなきゃ」と自分を急かし続けると、できていることが見えにくくなる場合があります。",
+    care: "今日できたことを3つだけ書き出してみてください。小さなことでも大丈夫です。",
+    message: "前に進む力は、あなたの大切な才能。でも、止まった日もあなたの価値は変わりません。",
+  },
+  "魔法使い": {
+    image: "images/mahotsukai.png",
+    tag: "感性を大切にする人",
+    state: "今のあなたは、自分らしさや感性、世界観を大切にしたい気持ちが強くなっているようです。「私はどう感じる？」という感覚が敏感になっています。",
+    strain: "理想と現実の違いや、周囲に理解されない感覚に疲れてしまうことがあるかもしれません。",
+    care: "好きな色、音楽、香り、服など、自分の感覚が喜ぶものをひとつ選んでください。",
+    message: "あなたの感じ方は、あなたにしかない大切なもの。無理に誰かと同じにならなくても大丈夫です。",
+  },
+  "博士": {
+    image: "images/hakase.png",
+    tag: "冷静に見つめる人",
+    state: "今のあなたは、少し距離を取って冷静に状況を分析したい気持ちが強くなっているようです。感情に飲み込まれないために、頭を使って整理しようとしている状態です。",
+    strain: "考え続けることで、気持ちや体の疲れに気づきにくくなっている可能性があります。",
+    care: "考える前に一度、「今、体はどんな感じ？」と確認してみてください。",
+    message: "考えることは、あなたを守るための大切な力。でも今日は、答えを出さなくてもいいことがあって大丈夫です。",
+  },
+  "探偵": {
+    image: "images/tantei.png",
+    tag: "先を読んで備える人",
+    state: "今のあなたは、不安なことやリスクを見つける力が強く働いているようです。先回りして備えようとする、慎重な状態です。",
+    strain: "まだ起きていないことまで考え続けると、心がずっと警戒モードになってしまいます。",
+    care: "「今、実際に起きていること」と「頭の中で想像していること」を分けて書いてみてください。",
+    message: "不安になるのは、あなたが自分や大切な人を守ろうとしているから。今ここで安全なことにも、少し目を向けてみてくださいね。",
+  },
+  "妖精": {
+    image: "images/yosei.png",
+    tag: "自由を楽しむ人",
+    state: "今のあなたは、自由でいたい、楽しいことをしたい、重たいものから少し離れたい気持ちが強くなっているようです。",
+    strain: "窮屈さや義務が続くと、急に全部投げ出したくなることがあるかもしれません。",
+    care: "10分だけでも、「何の役にも立たなくていい楽しい時間」を作ってみてください。",
+    message: "楽しいことに向かう力も、あなたを回復させる大切な力です。少し遊んでから戻ってきても大丈夫ですよ。",
+  },
+  "王様": {
+    image: "images/osama.png",
+    tag: "物事を動かす人",
+    state: "今のあなたは、自分で決めたい、主導権を持ちたいという気持ちが強くなっているようです。責任を引き受けたり、物事を動かす力が高まっています。",
+    strain: "思い通りにいかないことが続くと、怒りや強い言葉として出やすくなるかもしれません。",
+    care: "「本当は何をわかってほしかった？」と自分に聞いてみてください。",
+    message: "怒りの奥には、大切にしたい願いが隠れていることがあります。その願いを、まず自分が聞いてあげてください。",
+  },
+  "僧侶": {
+    image: "images/soryo.png",
+    tag: "静かに整える人",
+    state: "今のあなたは、少し休みたい、動かず静かにしていたい気持ちが強くなっているようです。心や体がエネルギーを温存しようとしている状態です。",
+    strain: "「動かなきゃ」と無理に自分を急かすほど、さらに動けなくなることがあります。",
+    care: "今日は「やらないこと」をひとつ決めてください。",
+    message: "止まることも、あなたを守るための大切な働き。休む時間も、ちゃんと前に進むための時間です。",
+  },
+};
+
+/* =========================================================
+   ④ 診断ロジック（ここから下は基本さわらなくてOK）
+   ========================================================= */
+const TOTAL = QUESTIONS.length;
+let current = 0;                       // 表示中の質問index
+let answers = new Array(TOTAL).fill(null); // 各問の選択index
+
+/* トップにキャラ画像を並べる */
+(function initStart(){
+  const row = document.getElementById("startCharas");
+  Object.values(CHARACTERS).forEach(c=>{
+    const img = document.createElement("img");
+    img.src = c.image; img.alt = ""; img.loading = "lazy";
+    row.appendChild(img);
+  });
+})();
+
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  window.scrollTo({top:0, behavior:"instant" in window ? "instant" : "auto"});
+}
+
+function startQuiz(){
+  current = 0;
+  answers = new Array(TOTAL).fill(null);
+  showScreen("screen-quiz");
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const Q = QUESTIONS[current];
+
+  // 進捗
+  document.getElementById("curNum").textContent = current+1;
+  document.getElementById("qNum").textContent = current+1;
+  document.getElementById("pbarFill").style.width = ((current) / TOTAL * 100) + "%";
+
+  // 質問文
+  document.getElementById("qText").textContent = Q.q;
+
+  // 選択肢
+  const box = document.getElementById("options");
+  box.innerHTML = "";
+  const letters = ["A","B","C","D"];
+  Q.opts.forEach((o,i)=>{
+    const b = document.createElement("button");
+    b.className = "opt" + (answers[current]===i ? " selected" : "");
+    b.innerHTML = `<span class="mark">${letters[i]}</span><span>${o.t}</span>`;
+    b.onclick = ()=> selectOption(i);
+    box.appendChild(b);
+  });
+
+  // もどるボタン
+  document.getElementById("backBtn").style.visibility = current===0 ? "hidden" : "visible";
+}
+
+function selectOption(i){
+  answers[current] = i;
+  // 見た目を更新（ふわっと）
+  const opts = document.querySelectorAll("#options .opt");
+  opts.forEach((el,idx)=> el.classList.toggle("selected", idx===i));
+
+  // 少し待ってから次へ
+  setTimeout(()=>{
+    if(current < TOTAL-1){
+      current++;
+      renderQuestion();
+    } else {
+      // 進捗を100%にしてから結果へ
+      document.getElementById("pbarFill").style.width = "100%";
+      setTimeout(showResult, 300);
+    }
+  }, 260);
+}
+
+function prevQuestion(){
+  if(current>0){ current--; renderQuestion(); }
+}
+
+/* 採点：同点は「後半の質問で選ばれたキャラ」を優先 */
+function calcRanking(){
+  const score = {};   // キャラ→点数
+  const last  = {};   // キャラ→最後に選ばれた問番号（同点判定用）
+  Object.keys(CHARACTERS).forEach(k=>{ score[k]=0; last[k]=-1; });
+
+  answers.forEach((ai, qi)=>{
+    if(ai===null) return;
+    const chara = QUESTIONS[qi].opts[ai].c;
+    score[chara] += 1;
+    last[chara] = qi;         // 後半ほど大きい番号
+  });
+
+  // 点数の高い順、同点は後半で選ばれた方を優先
+  return Object.keys(CHARACTERS)
+    .filter(k=> score[k] > 0)
+    .sort((a,b)=>{
+      if(score[b] !== score[a]) return score[b]-score[a];
+      return last[b]-last[a];
+    });
+}
+
+function showResult(){
+  const rank = calcRanking();
+  const first = rank[0];
+  const c = CHARACTERS[first];
+
+  // メインキャラ
+  document.getElementById("mainImg").src = c.image;
+  document.getElementById("mainImg").alt = first + "キャラ";
+  document.getElementById("mainName").innerHTML = `${first}<span class="k">キャラ</span>`;
+
+  // サブキャラ（2位・3位）
+  const subBox = document.getElementById("subCards");
+  subBox.innerHTML = "";
+  [1,2].forEach(idx=>{
+    const key = rank[idx];
+    if(!key) return;
+    const sc = CHARACTERS[key];
+    const el = document.createElement("div");
+    el.className = "sub-card";
+    el.innerHTML = `
+      <span class="rank">${idx+1}位</span>
+      <img src="${sc.image}" alt="${key}キャラ">
+      <div class="name">${key}<span class="k">キャラ</span></div>`;
+    subBox.appendChild(el);
+  });
+
+  // 支えているキャラの名前（本文用）
+  const supporters = rank.slice(1,3).map(k=> k+"キャラ").join("・") || "（今回はメインのみ）";
+
+  // 6項目
+  const detail = document.getElementById("detail");
+  detail.innerHTML = `
+    <div class="sec">
+      <h3>① 今、強く出ているキャラ</h3>
+      <p><b>${first}キャラ</b>（${c.tag}）</p>
+    </div>
+    <div class="sec support">
+      <h3>② 支えてくれているキャラ</h3>
+      <p class="who">${supporters}</p>
+    </div>
+    <div class="sec">
+      <h3>③ 今の状態</h3>
+      <p>${c.state}</p>
+    </div>
+    <div class="sec">
+      <h3>④ 無理しているポイント</h3>
+      <p>${c.strain}</p>
+    </div>
+    <div class="sec">
+      <h3>⑤ 今日できる整え方</h3>
+      <p>${c.care}</p>
+    </div>
+    <div class="sec message">
+      <h3>⑥ 今のあなたへのメッセージ</h3>
+      <p>${c.message}</p>
+    </div>`;
+
+  // CTAリンク
+  document.getElementById("ctaBtn").href = RESULT_LINK;
+
+  showScreen("screen-result");
+}
+
+function restart(){
+  showScreen("screen-start");
+}
+</script>
+</body>
+</html>
