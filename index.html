@@ -283,6 +283,7 @@ body{
 .main-card::before{ top:16px; left:20px; }
 .main-card::after{ top:20px; right:22px; font-size:14px; }
 .main-card .avatar{
+  display:block;
   width:130px; height:130px; border-radius:50%;
   box-shadow:0 8px 24px rgba(222,154,172,.4);
   background:#fff; margin:6px auto 14px;
@@ -330,7 +331,7 @@ body{
   color:#a99cc9; background:var(--lavender-bg);
   padding:2px 12px; border-radius:999px; margin-bottom:8px;
 }
-.sub-card img{ width:66px; height:66px; border-radius:50%; background:#fff; box-shadow:var(--shadow-soft); }
+.sub-card img{ display:block; margin:8px auto 0; width:66px; height:66px; border-radius:50%; background:#fff; box-shadow:var(--shadow-soft); }
 .sub-card .name{ font-size:16px; font-weight:800; margin-top:8px; }
 .sub-card .name .k{ color:var(--pink-deep); }
 .sub-card .s-tag{ font-size:11px; color:var(--ink-soft); margin-top:3px; }
@@ -356,11 +357,21 @@ body{
 .sec.support{ background:var(--lavender-bg); border-left-color:var(--lavender); }
 .sec.support .who{ font-weight:800; color:#8a7bb5; }
 .sec.message{
-  background:linear-gradient(135deg,var(--pink-bg),var(--yellow-bg));
-  border-left:none; text-align:center; padding:26px 22px;
+  background:#fff;
+  border-left:none;
+  border:2px solid #f7ebcf;
+  text-align:center;
+  padding:30px 22px;
+  margin:6px 4px;                 /* グロー(影)が見えるよう左右に余白 */
+  animation:msgGlow 2.8s ease-in-out infinite;
 }
-.sec.message h3{ justify-content:center; }
-.sec.message p{ font-size:15px; font-weight:600; }
+/* 白カードのまわりを黄色くぼかして光らせる */
+@keyframes msgGlow{
+  0%,100%{ box-shadow:0 0 20px 3px rgba(243,223,160,.55), 0 6px 18px rgba(150,120,110,.08); }
+  50%    { box-shadow:0 0 36px 9px rgba(243,223,160,.9),  0 6px 18px rgba(150,120,110,.08); }
+}
+.sec.message h3{ justify-content:center; color:var(--pink-deep); }
+.sec.message p{ font-size:15.5px; font-weight:700; color:var(--pink-deep); }
 
 /* 注意書き */
 .warn{
